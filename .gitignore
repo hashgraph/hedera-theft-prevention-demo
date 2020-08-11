@@ -102,3 +102,9 @@ dist
 
 # TernJS port file
 .tern-port
+
+backend/.idea/
+backend/hdtp-backend.iml
+backend/database/inventory.db
+frontend/.idea/
+frontend/frontend.iml
