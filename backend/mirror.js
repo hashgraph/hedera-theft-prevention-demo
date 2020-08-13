@@ -29,6 +29,7 @@ exports.startListening = function () {
         .setTopicId(consensusTopicId)
         .setStartTime(Date.now())
         .subscribe(mirrorClient, (response) => {
+            console.log('got mirror notification')
             listenAttempts = 0
             lastReceivedResponseTime = response.consensusTimestamp.asDate()
 
@@ -51,6 +52,7 @@ exports.startListening = function () {
 
 const handleNotification = function(mirrorResponse) {
     try {
+        console.log('handling mirror notification')
         const payload = new TextDecoder().decode(mirrorResponse.message);
         const itemData = JSON.parse(payload)
         const consensustime = mirrorResponse.consensusTimestamp.asDate()

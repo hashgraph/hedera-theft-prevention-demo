@@ -15,6 +15,7 @@ app.use(bodyParser.json());
 app.use(express.json())
 app.use(cors())
 
+console.log('start mirror listen')
 Mirror.startListening()
 
 app.get('/v1/items', function (req, res) {
