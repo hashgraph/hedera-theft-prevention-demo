@@ -1,6 +1,9 @@
 const WSPORT = process.env.WSPORT || 5000;
-const webSocketServer = new (require('ws')).Server({ port: WSPORT });
 const webSockets = {}
+const http = require('http');
+const url = require('url');
+const server = http.createServer();
+const webSocketServer = new (require('ws')).Server({ noServer: true });
 
 webSocketServer.on('connection', function connection(webSocket) {
     let userID = ''
@@ -16,6 +19,18 @@ webSocketServer.on('connection', function connection(webSocket) {
     })
 })
 
+server.on('upgrade', function upgrade(request, socket, head) {
+    const pathname = url.parse(request.url).pathname;
+
+    if (pathname === '/ws') {
+        webSocketServer.handleUpgrade(request, socket, head, function done(ws) {
+            webSocketServer.emit('connection', ws, request);
+        });
+    } else {
+        socket.destroy();
+    }
+})
+
 exports.sendNotification = function  (destination, message) {
     const toUserWebSocket = webSockets[destination]
     if (toUserWebSocket) {
@@ -23,3 +38,5 @@ exports.sendNotification = function  (destination, message) {
         delete webSockets[destination]
     }
 }
+
+server.listen(process.env.WSPORT)
