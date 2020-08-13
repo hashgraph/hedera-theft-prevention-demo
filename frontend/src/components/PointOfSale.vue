@@ -64,7 +64,7 @@
                             <v-list-item v-if="saleValid">
                                 <v-list-item-content>
                                     <div class="my-2">
-                                        <v-btn block x-large color="success" dark @click="sellItem">Confirm Sale</v-btn>
+                                        <v-btn block x-large color="success" dark :disabled="!sellEnabled" @click="sellItem">Confirm Sale</v-btn>
                                     </div>
                                 </v-list-item-content>
                             </v-list-item>
@@ -95,6 +95,16 @@
                                                     v-model.number="returnPrice"
                                                     :rules="returnPriceRules"
                                                     label="Price"
+                                            >
+                                            </v-text-field>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col>
+                                            <v-text-field
+                                                    v-model="posId"
+                                                    :rules="returnPosIdRules"
+                                                    label="Point of sale Id"
                                             >
                                             </v-text-field>
                                         </v-col>
@@ -174,6 +184,28 @@
                         </v-list-item-content>
                     </v-list-item>
                 </v-card>
+                <v-card v-if="result=='RETURNEDALREADY'">
+                    <v-list-item>
+                        <v-list-item-content>
+                            <v-list-item-title class="headline">Return Result</v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+                        <v-list-item-content>
+                            <v-list-item-title>Return details</v-list-item-title>
+                            <v-list-item-subtitle>Serial: {{ returnSerialReturned }}</v-list-item-subtitle>
+                            <v-list-item-subtitle>Price: {{ returnPriceReturned }}</v-list-item-subtitle>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+                        <v-list-item-icon>
+                            <v-icon large color="red darken-2">mdi-close</v-icon>
+                        </v-list-item-icon>
+                        <v-list-item-content>
+                            <v-list-item-title>Item already returned</v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                </v-card>
                 <v-card v-if="result=='RETURNEDFAIL'">
                     <v-list-item>
                         <v-list-item-content>
@@ -236,11 +268,15 @@
                 v => v.toString().length > 0 || 'Price is required',
                 v => parseFloat(v) === v || 'Price must be a number',
             ],
+            returnPosIdRules: [
+                v => v.toString().length > 0 || 'Point of sale Id is required',
+            ],
             consensusTime: '',
             sequenceNumber: '',
             runningHash: '',
             soldItems: [],
-            posId: uuid().substr(1,7)
+            posId: uuid().substr(1,7),
+            sellEnabled: false
         }),
         methods: {
             setupForSale: function () {
@@ -259,6 +295,7 @@
                 this.returnSerialReturned = ''
                 this.returnPrice = 0
                 this.returnPriceReturned = 0
+                this.sellEnabled = true
             },
             setupForReturn: function () {
                 this.action = 'RETURN'
@@ -275,6 +312,7 @@
             },
             sellItem: function () {
                 // call POA with sale details
+                this.sellEnabled = false
                 let body = {}
                 let payload = {}
                 this.saleSerialSold = this.saleSerial
@@ -284,6 +322,7 @@
                 payload.action = 'sell'
                 payload.posId = this.posId
                 body.payload = JSON.stringify(payload)
+                this.socketSubscribe(payload.serial)
                 axios.post('/poa/action', body)
                     .then(response => {
                         this.txId = response.data.transactionId
@@ -292,7 +331,7 @@
                         const txTime = txParts[1].split('.')
                         const nanos = txTime[1].padStart(9,'0')
                         this.txId = txParts[0].concat('@').concat(txTime[0]).concat('.').concat(nanos)
-                        bus.$emit('showSuccess', 'Sale Succeeded')
+                        bus.$emit('showProgress', 'Sale Succeeded')
                         this.saleTxUrl = 'https://explorer.kabuto.sh/testnet/search?q='.concat(this.txId)
                         this.result = 'SOLD'
                         this.soldItems.push(this.saleSerialSold)
@@ -324,9 +363,33 @@
                         this.sequenceNumber = response.data[0].sequenceNumber
                         this.runningHash = response.data[0].runningHash
 
-                        bus.$emit('showSuccess', 'Return Approved')
-                        this.saleTxUrl = 'https://explorer.kabuto.sh/testnet/search?q='.concat(this.txId)
-                        this.result = 'RETURNEDPASS'
+                        axios.get('/inventory/v1/item/'.concat(payload.serial))
+                        .then(response => {
+                            let canBeReturned = true
+                            if (response.data.length > 0) {
+                                if (response.data[response.data.length - 1].action === 'return') {
+                                    canBeReturned = false
+                                } else {
+                                    canBeReturned = true
+                                }
+                            } else {
+                                canBeReturned = false
+                            }
+                            if (canBeReturned) {
+                                bus.$emit('showSuccess', 'Return Approved')
+                                this.saleTxUrl = 'https://explorer.kabuto.sh/testnet/search?q='.concat(this.txId)
+                                this.result = 'RETURNEDPASS'
+                            } else  {
+                                bus.$emit('showError', 'Item already returned')
+                                this.saleTxUrl = 'https://explorer.kabuto.sh/testnet/search?q='.concat(this.txId)
+                                this.result = 'RETURNEDALREADY'
+                            }
+                        })
+                        .catch(e => {
+                            console.log(e)
+                            this.result = 'RETURNEDFAIL'
+                            bus.$emit('showError', 'An error occurred')
+                        })
                     })
                     .catch(e => {
                         console.log(e)
@@ -344,6 +407,7 @@
                 payload.posId = this.posId
                 body.payload = JSON.stringify(payload)
 
+                this.socketSubscribe(payload.serial)
                 axios.post('/poa/action', body)
                     .then(response => {
                         this.txId = response.data.transactionId
@@ -353,7 +417,7 @@
                         this.txId = txParts[0].concat('@').concat(txTime[0]).concat('.').concat(nanos)
                         this.consensusTime = ''
 
-                        bus.$emit('showSuccess', 'Return confirmed')
+                        bus.$emit('showProgress', 'Return confirmed')
                         this.saleTxUrl = 'https://explorer.kabuto.sh/testnet/search?q='.concat(this.txId)
                         this.result = 'RETURNEDPASS'
                     })
@@ -363,6 +427,21 @@
                         bus.$emit('showError', 'Return error ' + e)
                     })
 
+            },
+            socketSubscribe(serial) {
+                this.$socketClient.connect()
+                this.$socketClient.onOpen = () => {
+                    this.$socketClient.sendObj({serial: serial})
+                }
+                this.$socketClient.onMessage = (msg) => {
+                    bus.$emit('showSuccess', msg.data)
+                }
+                this.$socketClient.onClose = () => {
+                    console.log('socket closed')
+                }
+                this.$socketClient.onError = () => {
+                    console.log('socket error')
+                }
             }
         }
     }

@@ -15,11 +15,11 @@
       <v-spacer></v-spacer>
 
       <v-btn
-        href="https://explorer.kabuto.sh/testnet/id/0.0.119515"
+        href=topicUrl
         target="_blank"
         text
       >
-        <span class="mr-2">Topic 0.0.119515 on 3rd Party Explorer</span>
+        <span class="mr-2">Topic {{ topicId }} on 3rd Party Explorer</span>
         <v-icon>mdi-open-in-new</v-icon>
       </v-btn>
     </v-app-bar>
@@ -49,11 +49,18 @@ export default {
   data: () => ({
     snackbar: false,
     snackMessage: '',
-    snackAlert: 'alert'
+    snackAlert: 'alert',
+    topicUrl: "https://explorer.kabuto.sh/testnet/id/".concat(process.env.VUE_APP_TOPIC_ID),
+    topicId: process.env.VUE_APP_TOPIC_ID
   }),
-  mounted () {
+  mounted() {
     bus.$on('showSuccess', (message) => {
       this.snackAlert = 'success'
+      this.snackMessage = message
+      this.snackbar = true
+    })
+    bus.$on('showProgress', (message) => {
+      this.snackAlert = 'info'
       this.snackMessage = message
       this.snackbar = true
     })
@@ -67,5 +74,5 @@ export default {
       this.snackMessage = ''
     })
   }
-};
+}
 </script>

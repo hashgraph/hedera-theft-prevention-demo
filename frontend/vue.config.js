@@ -3,16 +3,17 @@ module.exports = {
     "vuetify"
   ],
   devServer: {
+    port: process.env.VUE_APP_PORT,
     proxy: {
       '/poa': {
-        target: 'http://localhost:8080',
+        target: process.env.VUE_APP_POA_URL,
         changeOrigin: true,
         pathRewrite: {
           '^/poa': '/v1'
         }
       },
       '/inventory': {
-        target: 'http://localhost:3128',
+        target: process.env.VUE_APP_SOR_URL,
         changeOrigin: true,
         pathRewrite: {
           '^/inventory': ''

@@ -210,12 +210,13 @@
                 payload.posId = this.posId
                 body.payload = JSON.stringify(payload)
 
+                this.socketSubscribe(this.selectedSerial)
                 axios.post('/poa/action', body)
                     .then(() => {
                         if (activate) {
-                            bus.$emit('showSuccess', 'Device activated')
+                            bus.$emit('showProgress', 'Device activated')
                         } else {
-                            bus.$emit('showSuccess', 'Device deactivated')
+                            bus.$emit('showProgress', 'Device deactivated')
                         }
                     })
                     .catch(e => {
@@ -435,6 +436,25 @@
                         console.log(e)
                     })
             },
+            socketSubscribe(serial) {
+                this.$socketClient.connect()
+                this.$socketClient.onOpen = () => {
+                    this.$socketClient.sendObj({serial: serial})
+                }
+                this.$socketClient.onMessage = (msg) => {
+                    bus.$emit('showSuccess', msg.data)
+                    if (this.action === 'MANAGE') {
+                        this.getselectedSerial()
+                        this.getItems()
+                    }
+                }
+                this.$socketClient.onClose = () => {
+                    console.log('socket closed')
+                }
+                this.$socketClient.onError = () => {
+                    console.log('socket error')
+                }
+            }
         }
     }
 </script>

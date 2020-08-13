@@ -1,5 +1,6 @@
 const dotEnv = require('dotenv')
 const dbService = require('./database')
+const WebSockets = require('./webSockets')
 
 const {
     MirrorClient,
@@ -23,7 +24,7 @@ exports.startListening = function () {
 
     consensusTopicId = process.env.TOPIC_ID;
 
-    console.log('Mirror new MirrorConsensusTopicQuery()')
+    console.log('Mirror new MirrorConsensusTopicQuery() for topic Id '.concat(consensusTopicId))
     new MirrorConsensusTopicQuery()
         .setTopicId(consensusTopicId)
         .setStartTime(Date.now())
@@ -56,6 +57,7 @@ const handleNotification = function(mirrorResponse) {
 
         dbService.addItem(itemData.serial, itemData.price, itemData.action, itemData.posId, consensustime)
             .then(() => {
+                WebSockets.sendNotification(itemData.serial, 'System of records updated for '.concat(itemData.action))
                 console.log('item added')
             })
             .catch(err => {
