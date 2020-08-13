@@ -18,10 +18,10 @@
     "sequelize-cli": "^6.2.0",
     "sqlite3": "^5.0.0",
     "umzug": "^2.3.0",
-    "ws": "^7.3.1"
-  },
-  "devDependencies": {
+    "ws": "^7.3.1",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0"
+  },
+  "devDependencies": {
   }
 }

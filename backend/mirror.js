@@ -40,7 +40,7 @@ exports.startListening = function () {
 
                 handleNotification(response);
             }, (error) => {
-                console.warn('Mirror error')
+                console.log('Mirror error')
                 console.warn(error)
                 listenAttempts += 1
                 isListening = false
