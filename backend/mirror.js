@@ -25,29 +25,34 @@ exports.startListening = function () {
     consensusTopicId = process.env.TOPIC_ID;
 
     console.log('Mirror new MirrorConsensusTopicQuery() for topic Id '.concat(consensusTopicId))
-    new MirrorConsensusTopicQuery()
-        .setTopicId(consensusTopicId)
-        .setStartTime(Date.now())
-        .subscribe(mirrorClient, (response) => {
-            console.log('got mirror notification')
-            listenAttempts = 0
-            lastReceivedResponseTime = response.consensusTimestamp.asDate()
+    try {
+        new MirrorConsensusTopicQuery()
+            .setTopicId(consensusTopicId)
+            .setStartTime(Date.now())
+            .subscribe(mirrorClient, (response) => {
+                console.log('got mirror notification')
+                listenAttempts = 0
+                lastReceivedResponseTime = response.consensusTimestamp.asDate()
 
-            // const message = response.message
-            // const timestamp = utils.secondsToDate(response.consensusTimestamp).toUTCString()
-            // const sequence = response.sequenceNumber
+                // const message = response.message
+                // const timestamp = utils.secondsToDate(response.consensusTimestamp).toUTCString()
+                // const sequence = response.sequenceNumber
 
-            handleNotification(response);
-        }, (error) => {
-            console.warn('Mirror error')
-            console.warn(error)
-            listenAttempts += 1
-            isListening = false
-            setTimeout(() => {
-                console.log('reconnecting...')
-                this.startListening()
-            }, listenAttempts * 250)
-        })
+                handleNotification(response);
+            }, (error) => {
+                console.warn('Mirror error')
+                console.warn(error)
+                listenAttempts += 1
+                isListening = false
+                setTimeout(() => {
+                    console.log('reconnecting...')
+                    this.startListening()
+                }, listenAttempts * 250)
+            })
+    }
+    catch (e) {
+        console.log(e)
+    }
 }
 
 const handleNotification = function(mirrorResponse) {
