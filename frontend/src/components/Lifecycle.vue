@@ -192,7 +192,8 @@
                     {text: 'proof', value: 'proof'}
                 ],
                 allitems: [],
-                selectedSerial: ''
+                selectedSerial: '',
+                socketConnected: false
             }
         },
         methods: {
@@ -437,9 +438,18 @@
                     })
             },
             socketSubscribe(serial) {
-                this.$socketClient.connect()
-                this.$socketClient.onOpen = () => {
+                if (this.socketConnected) {
                     this.$socketClient.sendObj({serial: serial})
+                } else {
+                    this.$socketClient.connect()
+                }
+                this.$socketClient.onOpen = () => {
+                    this.socketConnected = true
+                    try {
+                        this.$socketClient.sendObj({serial: serial})
+                    } catch (e) {
+                        console.error(e)
+                    }
                 }
                 this.$socketClient.onMessage = (msg) => {
                     bus.$emit('showSuccess', msg.data)
@@ -450,9 +460,11 @@
                 }
                 this.$socketClient.onClose = () => {
                     console.log('socket closed')
+                    this.socketConnected = false
                 }
                 this.$socketClient.onError = () => {
                     console.log('socket error')
+                    this.socketConnected = false
                 }
             }
         }
