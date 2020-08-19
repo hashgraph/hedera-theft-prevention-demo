@@ -39,4 +39,4 @@ exports.sendNotification = function  (destination, message) {
     }
 }
 
-server.listen(process.env.WSPORT)
+server.listen(WSPORT)

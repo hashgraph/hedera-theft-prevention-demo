@@ -72,49 +72,42 @@ run the following commands in three separate terminals
 #### Proof of action microservice
 
 ```shell script
-$ cd hedera-proof-of-action-microservice
+$ cd hedera-theft-prevention-demo/hedera-proof-of-action-microservice
 $ docker-compose up
 ```
 
+> poa_1  | INFO: listening on http://0.0.0.0:8080/
+
 _note: if you didn't specify a `HEDERA_TOPIC_ID` in the `.env` file, watch the console for the automatically created entity.
 
-```text
-poa_1  | WARNING: created new topic ID 0.0.128718
-```
+> poa_1  | WARNING: created new topic ID 0.0.128718
 
 #### backend
 
 ```shell script
-$ cd backend
+$ cd hedera-theft-prevention-demo/backend
 $ npm install
-$ rm database/*
+$ rm -f database/*
 $ node migrate.js
 $ node server.js
 ```
 
-should output
-
-```text
-start mirror listen
-Mirror startListening
-Mirror new MirrorConsensusTopicQuery() for topic Id 0.0.119515
-App running on localhost:3128
-```
+> start mirror listen
+> Mirror startListening
+> Mirror new MirrorConsensusTopicQuery() for topic Id 0.0.128718
+> App running on localhost:3128
 
 #### frontend
 
 ```shell script
-$ cd frontend
+$ cd hedera-theft-prevention-demo/frontend
 $ npm install
 $ npm run serve --disable-host-check
 ```
 
-should output
-
-```text
-App running at:
-   - Local:   http://localhost:8081/
-```
+>   App running at:
+>   - Local:   http://localhost:8081/
+>   - Network: http://192.168.3.21:8081/
 
 #### Launching the UI
 
