@@ -83,7 +83,7 @@
                                     <v-chip :color="getStatusColor(item.status)" dark>{{ item.status }}</v-chip>
                                 </template>
                                 <template v-slot:item.proof="{ item }">
-                                    <v-btn
+                                    <v-btn v-if="item.url"
                                             :href=item.url
                                             target="_blank"
                                             text
@@ -140,7 +140,7 @@
                             <v-chip :color="getStatusColor(item.status)" dark>{{ item.status }}</v-chip>
                         </template>
                         <template v-slot:item.proof="{ item }">
-                            <v-btn
+                            <v-btn v-if="item.url"
                                     :href=item.url
                                     target="_blank"
                                     text

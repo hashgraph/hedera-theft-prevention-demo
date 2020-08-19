@@ -15,7 +15,7 @@
       <v-spacer></v-spacer>
 
       <v-btn
-        href=topicUrl
+        :href=topicUrl
         target="_blank"
         text
       >
