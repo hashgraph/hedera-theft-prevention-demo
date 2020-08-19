@@ -1,0 +1,61 @@
+version: "3"
+services:
+  db:
+    container_name: hedera-theft-prevention-demo-db
+    image: postgres:12
+    restart: on-failure
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: hedera_proof_of_action__dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  poa:
+    container_name: hedera-theft-prevention-demo-poa
+    build:
+      context: hedera-proof-of-action-microservice/
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://db:5432/hedera_proof_of_action__dev
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=password
+      - HEDERA_TOPIC_ID=${TOPIC_ID}
+
+  backend:
+    container_name: hedera-theft-prevention-demo-backend
+    build:
+      context: backend/
+    restart: on-failure
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    environment:
+      - MIRROR_ADDRESS=api.testnet.kabuto.sh:50211
+      - DATABASE_LOCATION=./database/inventory.db
+
+  frontend:
+    container_name: hedera-theft-prevention-demo-frontend
+    build:
+      context: frontend/
+    restart: on-failure
+    ports:
+      - "8081:8081"
+    env_file:
+      - .env
+    environment:
+      - VUE_APP_PORT=8081
+      - VUE_APP_POA_URL=http://poa:8080
+      - VUE_APP_SOR_URL=ws://backend:3128
+      - VUE_APP_SOR_WS=ws://localhost:5000/ws
+      - VUE_APP_TOPIC_ID=${TOPIC_ID}
+

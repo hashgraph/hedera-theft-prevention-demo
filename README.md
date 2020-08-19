@@ -24,7 +24,22 @@ $ cd hedera-theft-prevention-demo
 
 ## Docker setup
 
-TBD
+```shell script
+$ cp .env.sample .env
+$ nano .env
+```
+
+update the following values
+* TOPIC_ID=0.0.yyyy
+* HEDERA_OPERATOR_ID=0.0.xxx
+* HEDERA_OPERATOR_KEY=302e....
+
+```shell script
+$ docker-compose build
+$ docker-compose up
+```
+
+The UI should now be available at `http://localhost:8081`
 
 ## Standalone Installation
 
