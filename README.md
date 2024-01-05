@@ -11,7 +11,7 @@ Each activity (point of sale or lifecycle management) is recorded on Hedera usin
 
 * Docker
 * Docker-compose
-* NodeJS v14.x
+* NodeJS v16.20.x
 * git
 * A Hedera Testnet account 
 
@@ -33,6 +33,8 @@ update the following values
 * TOPIC_ID=0.0.yyyy
 * HEDERA_OPERATOR_ID=0.0.xxx
 * HEDERA_OPERATOR_KEY=302e....
+
+_note: if you don't specify a TOPIC_ID, one will be created by the `hedera-theft-prevention-demo-poa` container upon startup and it will be output in the logs as follows `hedera-theft-prevention-demo-poa | WARNING: create new topic ID 0.0.xxxxxx`, stop all containers, update the `.env` file with this new topicId, then restart the containers, otherwise the other containers will not know of the topicId_
 
 ```shell script
 $ docker-compose build
@@ -67,7 +69,7 @@ $ nano .env
 
 update the following values
 
-* MIRROR_ADDRESS="hcs.testnet.mirrornode.hedera.com:5600" (if you're using mainnet or previewnet, update accordinly)
+* MIRROR_ADDRESS="hcs.testnet.mirrornode.hedera.com" (if you're using mainnet or previewnet, update accordingly)
 * TOPIC_ID=0.0.yyy (this should match the topic id from the proof-of-action microservice `.env` file)
 
 ```shell script
@@ -102,14 +104,14 @@ _note: if you didn't specify a `HEDERA_TOPIC_ID` in the `.env` file, watch the c
 ```shell script
 $ cd hedera-theft-prevention-demo/backend
 $ npm install
-$ rm -f database/*
+$ rm -f database
 $ node migrate.js
 $ node server.js
 ```
 
 > start mirror listen
 > Mirror startListening
-> Mirror new MirrorConsensusTopicQuery() for topic Id 0.0.128718
+> Mirror new MirrorConsensusTopicQuery() for topic Id 0.0.xxxxx
 > App running on localhost:3128
 
 #### frontend
