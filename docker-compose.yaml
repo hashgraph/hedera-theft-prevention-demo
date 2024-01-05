@@ -36,11 +36,11 @@ services:
       context: backend/
     restart: on-failure
     ports:
-      - "5000:5000"
+      - "5001:5001"
     env_file:
       - .env
     environment:
-      - MIRROR_ADDRESS=api.testnet.kabuto.sh:50211
+      - MIRROR_ADDRESS=hcs.testnet.mirrornode.hedera.com
       - DATABASE_LOCATION=./database/inventory.db
 
   frontend:
@@ -56,6 +56,6 @@ services:
       - VUE_APP_PORT=8081
       - VUE_APP_POA_URL=http://poa:8080
       - VUE_APP_SOR_URL=ws://backend:3128
-      - VUE_APP_SOR_WS=ws://localhost:5000/ws
+      - VUE_APP_SOR_WS=ws://localhost:5001/ws
       - VUE_APP_TOPIC_ID=${TOPIC_ID}
 
