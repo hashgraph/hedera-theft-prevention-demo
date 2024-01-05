@@ -246,7 +246,7 @@
             action: '',
             result: '',
             txId: '',
-            saleTxUrl: "https://kabuto.sh",
+            saleTxUrl: "https://hashscan.io",
             saleValid: false,
             saleSerial: '',
             saleSerialSold: '',
@@ -332,8 +332,9 @@
                         const nanos = txTime[1].padStart(9,'0')
                         this.txId = txParts[0].concat('@').concat(txTime[0]).concat('.').concat(nanos)
                         bus.$emit('showProgress', 'Sale Succeeded')
-                        this.saleTxUrl = 'https://explorer.kabuto.sh/testnet/search?q='.concat(this.txId)
-                        this.result = 'SOLD'
+                        this.saleTxUrl = `https://hashscan.io/testnet/transaction/`.concat(this.txId)
+
+                      this.result = 'SOLD'
                         this.soldItems.push(this.saleSerialSold)
                     })
                     .catch(e => {
@@ -377,11 +378,11 @@
                             }
                             if (canBeReturned) {
                                 bus.$emit('showSuccess', 'Return Approved')
-                                this.saleTxUrl = 'https://explorer.kabuto.sh/testnet/search?q='.concat(this.txId)
+                                this.saleTxUrl = `https://hashscan.io/testnet/transaction/`.concat(this.txId)
                                 this.result = 'RETURNEDPASS'
                             } else  {
                                 bus.$emit('showError', 'Item already returned')
-                                this.saleTxUrl = 'https://explorer.kabuto.sh/testnet/search?q='.concat(this.txId)
+                              this.saleTxUrl = `https://hashscan.io/testnet/transaction/`.concat(this.txId)
                                 this.result = 'RETURNEDALREADY'
                             }
                         })
@@ -418,7 +419,7 @@
                         this.consensusTime = ''
 
                         bus.$emit('showProgress', 'Return confirmed')
-                        this.saleTxUrl = 'https://explorer.kabuto.sh/testnet/search?q='.concat(this.txId)
+                        this.saleTxUrl = `https://hashscan.io/testnet/transaction/`.concat(this.txId)
                         this.result = 'RETURNEDPASS'
                     })
                     .catch(e => {
