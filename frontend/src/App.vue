@@ -50,7 +50,7 @@ export default {
     snackbar: false,
     snackMessage: '',
     snackAlert: 'alert',
-    topicUrl: "https://explorer.kabuto.sh/testnet/id/".concat(process.env.VUE_APP_TOPIC_ID),
+    topicUrl: "https://hashscan.io/testnet/topic/".concat(process.env.VUE_APP_TOPIC_ID),
     topicId: process.env.VUE_APP_TOPIC_ID
   }),
   mounted() {
