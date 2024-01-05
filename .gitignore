@@ -110,3 +110,4 @@ backend/hdtp-backend.iml
 backend/database/inventory.db
 frontend/.idea/
 frontend/frontend.iml
+.DS_Store
