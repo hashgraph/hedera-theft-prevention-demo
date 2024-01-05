@@ -288,7 +288,7 @@
                                 canBeDeActivated = false
                             }
 
-                            item.date = new Date(responseItem.consensustime).toLocaleString()
+                            item.date = new Date(responseItem.consensustime * 1000).toLocaleString()
                             item.posId = responseItem.posId
                             item.url = responseItem.consensusTime
 
@@ -334,7 +334,7 @@
                         const txTime = txParts[1].split('.')
                         const nanos = txTime[1].padStart(9,'0')
                         txId = txParts[0].concat('@').concat(txTime[0]).concat('.').concat(nanos)
-                        this.items[index].url = 'https://explorer.kabuto.sh/testnet/search?q='.concat(txId)
+                        this.items[index].url = `https://hashscan.io/testnet/transaction/`.concat(txId)
                     }
                 })
                 .catch(e => {
@@ -376,7 +376,7 @@
                             else if (responseItem.action === 'deactivate') item.status = 'deactivated'
                             else item.status = 'returned'
 
-                            item.date = new Date(responseItem.consensustime).toLocaleString()
+                            item.date = new Date(responseItem.consensustime * 1000).toLocaleString()
                             item.posId = responseItem.posId
 
                             if (responseItem.serial in responseItems) {
@@ -426,7 +426,7 @@
                             else if (response.data[i].action === 'deactivate') item.status = 'deactivated'
                             else item.status = 'returned'
 
-                            item.date = new Date(response.data[i].consensustime).toLocaleString()
+                            item.date = new Date(response.data[i].consensustime * 1000).toLocaleString()
                             item.posId = response.data[i].posId
                             item.url = ''
                             this.items.push(item)
