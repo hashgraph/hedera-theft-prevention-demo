@@ -3,13 +3,15 @@ const dbService = require('./database')
 const WebSockets = require('./webSockets')
 
 const {
-    MirrorClient,
-    MirrorConsensusTopicQuery
+    Client,
+    TopicMessageQuery, AccountId, PrivateKey, Timestamp
 } = require('@hashgraph/sdk')
 
 dotEnv.config()
 
-const mirrorClient = new MirrorClient(process.env.MIRROR_ADDRESS)
+const client = Client.forTestnet();
+const dummyKey = PrivateKey.generateED25519();
+client.setOperator(AccountId.fromString("0.0.2"), dummyKey)
 let consensusTopicId;
 
 let isListening = false
@@ -26,29 +28,32 @@ exports.startListening = function () {
 
     console.log('Mirror new MirrorConsensusTopicQuery() for topic Id '.concat(consensusTopicId))
     try {
-        new MirrorConsensusTopicQuery()
+        new TopicMessageQuery()
             .setTopicId(consensusTopicId)
-            .setStartTime(Date.now())
-            .subscribe(mirrorClient, (response) => {
-                console.log('got mirror notification')
-                listenAttempts = 0
-                lastReceivedResponseTime = response.consensusTimestamp.asDate()
 
-                // const message = response.message
-                // const timestamp = utils.secondsToDate(response.consensusTimestamp).toUTCString()
-                // const sequence = response.sequenceNumber
+            .subscribe(client,
+                (error) => {
+                    console.log('Mirror error')
+                    console.warn(error)
+                    listenAttempts += 1
+                    isListening = false
+                    setTimeout(() => {
+                        console.log('reconnecting...')
+                        this.startListening()
+                    }, listenAttempts * 250)
+                },
+                (message) => {
+                    console.log('got mirror notification')
+                    listenAttempts = 0
+                    lastReceivedResponseTime = message.consensusTimestamp
 
-                handleNotification(response);
-            }, (error) => {
-                console.log('Mirror error')
-                console.warn(error)
-                listenAttempts += 1
-                isListening = false
-                setTimeout(() => {
-                    console.log('reconnecting...')
-                    this.startListening()
-                }, listenAttempts * 250)
-            })
+                    // const message = response.message
+                    // const timestamp = utils.secondsToDate(response.consensusTimestamp).toUTCString()
+                    // const sequence = response.sequenceNumber
+
+                    handleNotification(message);
+                }
+            );
     }
     catch (e) {
         console.log(e)
@@ -58,16 +63,17 @@ exports.startListening = function () {
 const handleNotification = function(mirrorResponse) {
     try {
         console.log('handling mirror notification')
-        const payload = new TextDecoder().decode(mirrorResponse.message);
+        const payload = new TextDecoder().decode(mirrorResponse.contents);
         const itemData = JSON.parse(payload)
-        const consensustime = mirrorResponse.consensusTimestamp.asDate()
+        const consensustime = mirrorResponse.consensusTimestamp.seconds.toString();
 
         dbService.addItem(itemData.serial, itemData.price, itemData.action, itemData.posId, consensustime)
             .then(() => {
+                console.log(`item added ${itemData.serial} - ${itemData.action} -${consensustime}`);
                 WebSockets.sendNotification(itemData.serial, 'System of records updated for '.concat(itemData.action))
-                console.log('item added')
             })
             .catch(err => {
+                console.log(`error ${itemData.serial} - ${itemData.action} -${consensustime}`);
                 if (err.toString().includes('UNIQUE constraint')) {
                     console.warn("duplicate Operation consensus timestamp detected - skipping");
                 } else {
