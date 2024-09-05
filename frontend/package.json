@@ -10,7 +10,7 @@
   "dependencies": {
     "axios": "^0.21.2",
     "core-js": "^3.6.5",
-    "vue": "^2.6.11",
+    "vue": "^2.7.16",
     "vue-router": "^3.4.2",
     "vue-simple-websocket": "0.0.3",
     "vuetify": "^2.2.11"
