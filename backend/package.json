@@ -6,7 +6,8 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "@hashgraph/sdk": "2.39.0",
+    "@ethersproject/signing-key": "^5.8.0",
+    "@hashgraph/sdk": "2.59.0",
     "body-parser": "^1.19.0",
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
@@ -20,9 +21,6 @@
     "sequelize-cli": "^6.2.0",
     "sqlite3": "^5.0.0",
     "umzug": "^2.3.0",
-    "ws": "^7.4.6",
-    "cors": "^2.8.5",
-    "dotenv": "^8.2.0"
-  },
-  "devDependencies": {}
+    "ws": "^7.4.6"
+  }
 }
